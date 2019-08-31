@@ -72,7 +72,7 @@ BuildRequires : procps-ng
 BuildRequires : glibc-libc32
 BuildRequires : glibc-dev32
 BuildRequires : docbook-xml docbook-utils doxygen
-BuildRequires : mingw-binutils mingw-crt mingw-crt-dev
+BuildRequires : mingw-binutils # mingw-crt mingw-crt-dev
 
 
 Requires: gcc-libubsan
@@ -254,7 +254,7 @@ export CFLAGS_FOR_TARGET="$CFLAGS"
 export CXXFLAGS_FOR_TARGET="$CXXFLAGS"
 export FFLAGS_FOR_TARGET="$FFLAGS"
 
-export CPATH=/usr/include/mingw
+export CPATH=/usr/include
 export LIBRARY_PATH=/usr/lib64
 
 ../%{gccpath}/configure \
