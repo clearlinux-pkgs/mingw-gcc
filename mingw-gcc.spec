@@ -310,10 +310,10 @@ popd
 export CPATH=/usr/include
 export LIBRARY_PATH=/usr/lib64
 pushd ../gcc-build
-ln -s /usr/bin/x86_64-w64-mingw32-as %{buildroot}/usr/lib64/gcc/x86_64-w64-mingw32/9/as
 
 
 make DESTDIR=%{buildroot} install-gcc 
+ln -s /usr/bin/x86_64-w64-mingw32-as %{buildroot}/usr/lib64/gcc/x86_64-w64-mingw32/9/as
 
 %files
    /usr/bin/x86_64-w64-mingw32-cpp
