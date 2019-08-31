@@ -277,7 +277,7 @@ export LIBRARY_PATH=/usr/lib64
     --enable-ld=default\
     --enable-clocale=gnu\
     --disable-multiarch\
-    --disable-multilib\
+    --enable-multilib\
     --disable-lto\
     --disable-win32-registry \
     --disable-werror \
@@ -306,13 +306,13 @@ make -j20 all-gcc
 popd
 
 
+
 %install
 export CPATH=/usr/include
 export LIBRARY_PATH=/usr/lib64
 pushd ../gcc-build
-
-
 make DESTDIR=%{buildroot} install-gcc 
+popd
 ln -s /usr/bin/x86_64-w64-mingw32-as %{buildroot}/usr/lib64/gcc/x86_64-w64-mingw32/9/as
 ln -s /usr/bin/x86_64-w64-mingw32-ld %{buildroot}/usr/lib64/gcc/x86_64-w64-mingw32/9/ld
 ln -s /usr/bin/x86_64-w64-mingw32-ar %{buildroot}/usr/lib64/gcc/x86_64-w64-mingw32/9/ar
