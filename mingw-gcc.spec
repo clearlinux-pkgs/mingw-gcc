@@ -72,7 +72,8 @@ BuildRequires : procps-ng
 BuildRequires : glibc-libc32
 BuildRequires : glibc-dev32
 BuildRequires : docbook-xml docbook-utils doxygen
-BuildRequires : mingw-binutils # mingw-crt mingw-crt-dev
+BuildRequires : mingw-binutils 
+# mingw-crt mingw-crt-dev
 
 
 Requires: gcc-libubsan
