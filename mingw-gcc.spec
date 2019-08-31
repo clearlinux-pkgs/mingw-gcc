@@ -439,6 +439,6 @@ make DESTDIR=%{buildroot} install-gcc
    /usr/share/man/man1/x86_64-w64-mingw32-gcov-dump.1
    /usr/share/man/man1/x86_64-w64-mingw32-gcov-tool.1
    /usr/share/man/man1/x86_64-w64-mingw32-gcov.1
-   /usr/share/man/man7/fsf-funding.7
-   /usr/share/man/man7/gfdl.7
-   /usr/share/man/man7/gpl.7
+%exclude    /usr/share/man/man7/fsf-funding.7
+%exclude   /usr/share/man/man7/gfdl.7
+%exclude   /usr/share/man/man7/gpl.7
