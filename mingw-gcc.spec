@@ -289,7 +289,7 @@ export LIBRARY_PATH=/usr/lib64:/usr/mingw/lib:/usr/lib64
     --disable-win32-registry \
     --disable-werror \
     --enable-linker-build-id \
-    --enable-languages="c" \
+    --enable-languages="c,c++,fortran" \
     --build=%{gcc_target}\
     --target=x86_64-w64-mingw32 \
     --disable-bootstrap \
@@ -504,3 +504,31 @@ ln -s /usr/bin/x86_64-w64-mingw32-ranlib %{buildroot}/usr/mingw/lib/gcc/x86_64-w
    /usr/mingw/lib/libquadmath.dll.a
 %exclude    /usr/mingw/lib/libquadmath.la
 %exclude /usr/x86_64-w64-mingw32
+   /usr/mingw/include/c++/9
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/cc1plus
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/f951
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/finclude/ieee_arithmetic.mod
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/finclude/ieee_exceptions.mod
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/finclude/ieee_features.mod
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/ISO_Fortran_binding.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/libcaf_single.a
+%exclude   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/libcaf_single.la
+   /usr/mingw/lib/libgfortran-5.dll
+   /usr/mingw/lib/libgfortran.a
+   /usr/mingw/lib/libgfortran.dll.a
+%exclude   /usr/mingw/lib/libgfortran.la
+   /usr/mingw/lib/libgfortran.spec
+   /usr/mingw/lib/libstdc++-6.dll
+   /usr/mingw/lib/libstdc++.a
+   /usr/mingw/lib/libstdc++.dll.a
+   /usr/mingw/lib/libstdc++.dll.a-gdb.py
+%exclude   /usr/mingw/lib/libstdc++.la
+   /usr/mingw/lib/libsupc++.a
+%exclude   /usr/mingw/lib/libsupc++.la
+   /usr/share/gcc-9/python/libstdcxx/__init__.py
+   /usr/share/gcc-9/python/libstdcxx/v6/__init__.py
+   /usr/share/gcc-9/python/libstdcxx/v6/printers.py
+   /usr/share/gcc-9/python/libstdcxx/v6/xmethods.py
+%exclude   /usr/share/info/gfortran.info
+   /usr/share/man/man1/x86_64-w64-mingw32-g++.1
+   /usr/share/man/man1/x86_64-w64-mingw32-gfortran.1
