@@ -525,10 +525,10 @@ ln -s /usr/bin/x86_64-w64-mingw32-ranlib %{buildroot}/usr/mingw/lib/gcc/x86_64-w
 %exclude   /usr/mingw/lib/libstdc++.la
    /usr/mingw/lib/libsupc++.a
 %exclude   /usr/mingw/lib/libsupc++.la
-   /usr/share/gcc-9/python/libstdcxx/__init__.py
-   /usr/share/gcc-9/python/libstdcxx/v6/__init__.py
-   /usr/share/gcc-9/python/libstdcxx/v6/printers.py
-   /usr/share/gcc-9/python/libstdcxx/v6/xmethods.py
+%exclude    /usr/share/gcc-9/python/libstdcxx/__init__.py
+%exclude    /usr/share/gcc-9/python/libstdcxx/v6/__init__.py
+%exclude   /usr/share/gcc-9/python/libstdcxx/v6/printers.py
+%exclude   /usr/share/gcc-9/python/libstdcxx/v6/xmethods.py
 %exclude   /usr/share/info/gfortran.info
    /usr/share/man/man1/x86_64-w64-mingw32-g++.1
    /usr/share/man/man1/x86_64-w64-mingw32-gfortran.1
