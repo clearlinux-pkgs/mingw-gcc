@@ -332,7 +332,7 @@ ln -s /usr/bin/x86_64-w64-mingw32-ranlib %{buildroot}/usr/lib64/gcc/x86_64-w64-m
    /usr/lib64/gcc/x86_64-w64-mingw32/9/as
    /usr/lib64/gcc/x86_64-w64-mingw32/9/ld
    /usr/lib64/gcc/x86_64-w64-mingw32/9/ar
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/ranlibg
+   /usr/lib64/gcc/x86_64-w64-mingw32/9/ranlib
    /usr/lib64/gcc/x86_64-w64-mingw32/9/collect2
    /usr/lib64/gcc/x86_64-w64-mingw32/9/include-fixed/README
    /usr/lib64/gcc/x86_64-w64-mingw32/9/include-fixed/limits.h
