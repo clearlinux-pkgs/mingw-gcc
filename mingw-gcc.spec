@@ -316,6 +316,7 @@ make DESTDIR=%{buildroot} install-gcc
 ln -s /usr/bin/x86_64-w64-mingw32-as %{buildroot}/usr/lib64/gcc/x86_64-w64-mingw32/9/as
 ln -s /usr/bin/x86_64-w64-mingw32-ld %{buildroot}/usr/lib64/gcc/x86_64-w64-mingw32/9/ld
 ln -s /usr/bin/x86_64-w64-mingw32-ar %{buildroot}/usr/lib64/gcc/x86_64-w64-mingw32/9/ar
+ln -s /usr/bin/x86_64-w64-mingw32-ranlib %{buildroot}/usr/lib64/gcc/x86_64-w64-mingw32/9/ranlib
 
 %files
    /usr/bin/x86_64-w64-mingw32-cpp
@@ -331,6 +332,7 @@ ln -s /usr/bin/x86_64-w64-mingw32-ar %{buildroot}/usr/lib64/gcc/x86_64-w64-mingw
    /usr/lib64/gcc/x86_64-w64-mingw32/9/as
    /usr/lib64/gcc/x86_64-w64-mingw32/9/ld
    /usr/lib64/gcc/x86_64-w64-mingw32/9/ar
+   /usr/lib64/gcc/x86_64-w64-mingw32/9/ranlibg
    /usr/lib64/gcc/x86_64-w64-mingw32/9/collect2
    /usr/lib64/gcc/x86_64-w64-mingw32/9/include-fixed/README
    /usr/lib64/gcc/x86_64-w64-mingw32/9/include-fixed/limits.h
