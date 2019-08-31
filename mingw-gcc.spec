@@ -314,6 +314,7 @@ pushd ../gcc-build
 
 make DESTDIR=%{buildroot} install-gcc 
 ln -s /usr/bin/x86_64-w64-mingw32-as %{buildroot}/usr/lib64/gcc/x86_64-w64-mingw32/9/as
+ln -s /usr/bin/x86_64-w64-mingw32-ld %{buildroot}/usr/lib64/gcc/x86_64-w64-mingw32/9/ld
 
 %files
    /usr/bin/x86_64-w64-mingw32-cpp
@@ -327,6 +328,7 @@ ln -s /usr/bin/x86_64-w64-mingw32-as %{buildroot}/usr/lib64/gcc/x86_64-w64-mingw
    /usr/bin/x86_64-w64-mingw32-gcov-tool
    /usr/lib64/gcc/x86_64-w64-mingw32/9/cc1
    /usr/lib64/gcc/x86_64-w64-mingw32/9/as
+   /usr/lib64/gcc/x86_64-w64-mingw32/9/ld
    /usr/lib64/gcc/x86_64-w64-mingw32/9/collect2
    /usr/lib64/gcc/x86_64-w64-mingw32/9/include-fixed/README
    /usr/lib64/gcc/x86_64-w64-mingw32/9/include-fixed/limits.h
