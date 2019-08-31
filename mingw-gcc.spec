@@ -72,7 +72,7 @@ BuildRequires : procps-ng
 BuildRequires : glibc-libc32
 BuildRequires : glibc-dev32
 BuildRequires : docbook-xml docbook-utils doxygen
-BuildRequires : mingw-binutils
+BuildRequires : mingw-binutils mingw-crt mingw-crt-dev
 
 
 Requires: gcc-libubsan
@@ -254,7 +254,7 @@ export CFLAGS_FOR_TARGET="$CFLAGS"
 export CXXFLAGS_FOR_TARGET="$CXXFLAGS"
 export FFLAGS_FOR_TARGET="$FFLAGS"
 
-export CPATH=/usr/include
+export CPATH=/usr/include/mingw
 export LIBRARY_PATH=/usr/lib64
 
 ../%{gccpath}/configure \
@@ -288,7 +288,7 @@ export LIBRARY_PATH=/usr/lib64
     --with-ppl=yes \
     --with-isl \
     --disable-libssp \
-    --includedir=/usr/include \
+    --includedir=/usr/include/mingw \
     --exec-prefix=/usr \
     --disable-libunwind-exceptions \
     --with-gnu-ld \
@@ -310,7 +310,7 @@ export CPATH=/usr/include
 export LIBRARY_PATH=/usr/lib64
 pushd ../gcc-build
 
-make DESTDIR=%{buildroot} install-gcc
+make DESTDIR=%{buildroot} install-gcc install-headers
 
 %files
    /usr/bin/x86_64-w64-mingw32-cpp
@@ -429,11 +429,11 @@ make DESTDIR=%{buildroot} install-gcc
    /usr/lib64/gcc/x86_64-w64-mingw32/9/install-tools/mkheaders.conf
    /usr/lib64/gcc/x86_64-w64-mingw32/9/install-tools/mkinstalldirs
    /usr/lib64/gcc/x86_64-w64-mingw32/9/lto-wrapper
-   /usr/share/info/cpp.info
-   /usr/share/info/cppinternals.info
-   /usr/share/info/gcc.info
-   /usr/share/info/gccinstall.info
-   /usr/share/info/gccint.info
+%exclude    /usr/share/info/cpp.info
+%exclude    /usr/share/info/cppinternals.info
+%exclude    /usr/share/info/gcc.info
+%exclude    /usr/share/info/gccinstall.info
+%exclude    /usr/share/info/gccint.info
    /usr/share/man/man1/x86_64-w64-mingw32-cpp.1
    /usr/share/man/man1/x86_64-w64-mingw32-gcc.1
    /usr/share/man/man1/x86_64-w64-mingw32-gcov-dump.1
