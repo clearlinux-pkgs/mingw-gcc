@@ -12,6 +12,9 @@
 # avoton (silvermont target) && ivybridge (OBS builders) = westmere
 %define march westmere
 %define abi_package %{nil}
+# Suppress stripping binaries
+%define __strip /bin/true
+%define debug_package %{nil}
 
 Name     : mingw-gcc
 Version  : 9.2.1
@@ -74,6 +77,7 @@ BuildRequires : glibc-dev32
 BuildRequires : docbook-xml docbook-utils doxygen
 BuildRequires : mingw-binutils 
 BuildRequires : mingw-crt mingw-crt-dev
+BuildRequires : strace
 
 
 Requires: gcc-libubsan
@@ -249,26 +253,29 @@ mkdir ../gcc-build
 pushd ../gcc-build
 unset CFLAGS
 unset CXXFLAGS
-export CFLAGS="-march=westmere -g1 -O3 -fstack-protector -Wl,-z -Wl,now -Wl,-z -Wl,relro  -Wl,-z,max-page-size=0x1000 -mtune=skylake"
-export CXXFLAGS="-march=westmere -g1 -O3  -Wl,-z,max-page-size=0x1000 -mtune=skylake"
-export CFLAGS_FOR_TARGET="$CFLAGS"
-export CXXFLAGS_FOR_TARGET="$CXXFLAGS"
-export FFLAGS_FOR_TARGET="$FFLAGS"
-
-export CPATH=/usr/include
-export LIBRARY_PATH=/usr/lib64
+export CFLAGS="-march=westmere -g1 -O3 -fno-stack-protector -mtune=skylake"
+export CXXFLAGS="-march=westmere -g1 -O3   -mtune=skylake"
+export CFLAGS_FOR_TARGET="$CFLAGS -I /usr/mingw/include -isystem /usr/mingw/include -isysroot=/usr/mingw/ "
+export CXXFLAGS_FOR_TARGET="$CXXFLAGS -isystem /usr/mingw/include"
+export FFLAGS_FOR_TARGET="$FFLAGS  -isystem /usr/mingw/include"
+export LDFLAGS_FOR_TARGET="$LFDLAGS -L/usr/mingw/lib "
+export AS="/usr/bin/x86_64-w64-mingw32-as"
+export AR="/usr/bin/x86_64-w64-mingw32-ar"
+export RANLIB="/usr/bin/x86_64-w64-mingw32-ranlib"
+export DLLTOOL="/usr/bin/x86_64-w64-mingw32-dlltool" 
+export LIBRARY_PATH=/usr/lib64:/usr/mingw/lib:/usr/lib64
 
 ../%{gccpath}/configure \
     --prefix=/usr \
     --with-pkgversion='Clear Linux OS for Intel Architecture'\
-    --libdir=/usr/lib64 \
+    --libdir=/usr/mingw/lib \
     --enable-libstdcxx-pch\
-    --libexecdir=/usr/lib64 \
+    --libexecdir=/usr/mingw/lib \
     --with-system-zlib\
     --enable-shared\
     --enable-gnu-indirect-function \
     --disable-vtable-verify \
-    --enable-threads=posix\
+    --enable-threads=win32 \
     --enable-__cxa_atexit\
     --disable-plugin\
     --with-gnu-as \
@@ -277,7 +284,7 @@ export LIBRARY_PATH=/usr/lib64
     --enable-ld=default\
     --enable-clocale=gnu\
     --disable-multiarch\
-    --enable-multilib\
+    --disable-multilib\
     --disable-lto\
     --disable-win32-registry \
     --disable-werror \
@@ -289,7 +296,7 @@ export LIBRARY_PATH=/usr/lib64
     --with-ppl=yes \
     --with-isl \
     --disable-libssp \
-    --includedir=/usr/include/mingw \
+    --includedir=/usr/mingw/include \
     --exec-prefix=/usr \
     --disable-libunwind-exceptions \
     --with-gnu-ld \
@@ -299,7 +306,7 @@ export LIBRARY_PATH=/usr/lib64
     --disable-libmpx \
     --with-gcc-major-version-only 
 
-make -j20 all-gcc
+make -j20 all
 
 #    --enable-languages="c,c++,fortran" \
 
@@ -308,15 +315,17 @@ popd
 
 
 %install
-export CPATH=/usr/include
 export LIBRARY_PATH=/usr/lib64
+mkdir -p  %{buildroot}/usr/mingw
+ln -s mingw %{buildroot}/usr/x86_64-w64-mingw32
+
 pushd ../gcc-build
-make DESTDIR=%{buildroot} install-gcc 
+make DESTDIR=%{buildroot} install 
 popd
-ln -s /usr/bin/x86_64-w64-mingw32-as %{buildroot}/usr/lib64/gcc/x86_64-w64-mingw32/9/as
-ln -s /usr/bin/x86_64-w64-mingw32-ld %{buildroot}/usr/lib64/gcc/x86_64-w64-mingw32/9/ld
-ln -s /usr/bin/x86_64-w64-mingw32-ar %{buildroot}/usr/lib64/gcc/x86_64-w64-mingw32/9/ar
-ln -s /usr/bin/x86_64-w64-mingw32-ranlib %{buildroot}/usr/lib64/gcc/x86_64-w64-mingw32/9/ranlib
+ln -s /usr/bin/x86_64-w64-mingw32-as %{buildroot}/usr/mingw/lib/gcc/x86_64-w64-mingw32/9/as
+ln -s /usr/bin/x86_64-w64-mingw32-ld %{buildroot}/usr/mingw/lib/gcc/x86_64-w64-mingw32/9/ld
+ln -s /usr/bin/x86_64-w64-mingw32-ar %{buildroot}/usr/mingw/lib/gcc/x86_64-w64-mingw32/9/ar
+ln -s /usr/bin/x86_64-w64-mingw32-ranlib %{buildroot}/usr/mingw/lib/gcc/x86_64-w64-mingw32/9/ranlib
 
 %files
    /usr/bin/x86_64-w64-mingw32-cpp
@@ -328,117 +337,117 @@ ln -s /usr/bin/x86_64-w64-mingw32-ranlib %{buildroot}/usr/lib64/gcc/x86_64-w64-m
    /usr/bin/x86_64-w64-mingw32-gcov
    /usr/bin/x86_64-w64-mingw32-gcov-dump
    /usr/bin/x86_64-w64-mingw32-gcov-tool
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/cc1
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/as
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/ld
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/ar
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/ranlib
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/collect2
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include-fixed/README
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include-fixed/limits.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include-fixed/syslimits.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/adxintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/ammintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx2intrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx5124fmapsintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx5124vnniwintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx512bitalgintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx512bwintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx512cdintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx512dqintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx512erintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx512fintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx512ifmaintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx512ifmavlintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx512pfintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx512vbmi2intrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx512vbmi2vlintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx512vbmiintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx512vbmivlintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx512vlbwintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx512vldqintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx512vlintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx512vnniintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx512vnnivlintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx512vpopcntdqintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avx512vpopcntdqvlintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/avxintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/bmi2intrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/bmiintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/bmmintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/cet.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/cetintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/cldemoteintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/clflushoptintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/clwbintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/clzerointrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/cpuid.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/cross-stdarg.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/emmintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/f16cintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/float.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/fma4intrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/fmaintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/fxsrintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/gfniintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/ia32intrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/immintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/iso646.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/lwpintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/lzcntintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/mm3dnow.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/mm_malloc.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/mmintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/movdirintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/mwaitxintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/nmmintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/pconfigintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/pkuintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/pmmintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/popcntintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/prfchwintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/rdseedintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/rtmintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/sgxintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/shaintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/smmintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/stdalign.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/stdarg.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/stdatomic.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/stdbool.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/stddef.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/stdfix.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/stdint-gcc.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/stdint.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/stdnoreturn.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/tbmintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/tgmath.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/tmmintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/vaesintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/varargs.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/vpclmulqdqintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/waitpkgintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/wbnoinvdintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/wmmintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/x86intrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/xmmintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/xopintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/xsavecintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/xsaveintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/xsaveoptintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/xsavesintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/include/xtestintrin.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/install-tools/fixinc.sh
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/install-tools/fixinc_list
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/install-tools/fixincl
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/install-tools/gsyslimits.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/install-tools/include/README
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/install-tools/include/limits.h
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/install-tools/macro_list
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/install-tools/mkheaders
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/install-tools/mkheaders.conf
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/install-tools/mkinstalldirs
-   /usr/lib64/gcc/x86_64-w64-mingw32/9/lto-wrapper
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/cc1
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/as
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/ld
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/ar
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/ranlib
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/collect2
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include-fixed/README
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include-fixed/limits.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include-fixed/syslimits.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/adxintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/ammintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx2intrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx5124fmapsintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx5124vnniwintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx512bitalgintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx512bwintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx512cdintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx512dqintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx512erintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx512fintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx512ifmaintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx512ifmavlintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx512pfintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx512vbmi2intrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx512vbmi2vlintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx512vbmiintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx512vbmivlintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx512vlbwintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx512vldqintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx512vlintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx512vnniintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx512vnnivlintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx512vpopcntdqintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avx512vpopcntdqvlintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/avxintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/bmi2intrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/bmiintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/bmmintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/cet.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/cetintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/cldemoteintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/clflushoptintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/clwbintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/clzerointrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/cpuid.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/cross-stdarg.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/emmintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/f16cintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/float.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/fma4intrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/fmaintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/fxsrintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/gfniintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/ia32intrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/immintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/iso646.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/lwpintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/lzcntintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/mm3dnow.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/mm_malloc.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/mmintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/movdirintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/mwaitxintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/nmmintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/pconfigintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/pkuintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/pmmintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/popcntintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/prfchwintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/rdseedintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/rtmintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/sgxintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/shaintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/smmintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/stdalign.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/stdarg.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/stdatomic.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/stdbool.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/stddef.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/stdfix.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/stdint-gcc.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/stdint.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/stdnoreturn.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/tbmintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/tgmath.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/tmmintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/vaesintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/varargs.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/vpclmulqdqintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/waitpkgintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/wbnoinvdintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/wmmintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/x86intrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/xmmintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/xopintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/xsavecintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/xsaveintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/xsaveoptintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/xsavesintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/xtestintrin.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/install-tools/fixinc.sh
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/install-tools/fixinc_list
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/install-tools/fixincl
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/install-tools/gsyslimits.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/install-tools/include/README
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/install-tools/include/limits.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/install-tools/macro_list
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/install-tools/mkheaders
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/install-tools/mkheaders.conf
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/install-tools/mkinstalldirs
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/lto-wrapper
 %exclude    /usr/share/info/cpp.info
 %exclude    /usr/share/info/cppinternals.info
 %exclude    /usr/share/info/gcc.info
@@ -452,3 +461,46 @@ ln -s /usr/bin/x86_64-w64-mingw32-ranlib %{buildroot}/usr/lib64/gcc/x86_64-w64-m
 %exclude    /usr/share/man/man7/fsf-funding.7
 %exclude   /usr/share/man/man7/gfdl.7
 %exclude   /usr/share/man/man7/gpl.7
+ /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/crtbegin.o
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/crtend.o
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/crtfastmath.o
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/gcov.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/quadmath.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/quadmath_weak.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/unwind.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/libgcc.a
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/libgcc_eh.a
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/libgcov.a
+   /usr/share/info/libquadmath.info
+   /usr/mingw/lib/libatomic-1.dll
+   /usr/mingw/lib/libatomic.a
+   /usr/mingw/lib/libatomic.dll.a
+%exclude    /usr/mingw/lib/libatomic.la
+   /usr/mingw/lib/libgcc_s.a
+   /usr/mingw/lib/libgcc_s_seh-1.dll
+   /usr/mingw/lib/libquadmath-0.dll
+   /usr/mingw/lib/libquadmath.a
+   /usr/mingw/lib/libquadmath.dll.a
+%exclude    /usr/mingw/lib/libquadmath.la
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/crtbegin.o
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/crtend.o
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/crtfastmath.o
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/gcov.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/quadmath.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/quadmath_weak.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/include/unwind.h
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/libgcc.a
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/libgcc_eh.a
+   /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/libgcov.a
+   /usr/share/info/libquadmath.info
+   /usr/mingw/lib/libatomic-1.dll
+   /usr/mingw/lib/libatomic.a
+   /usr/mingw/lib/libatomic.dll.a
+%exclude    /usr/mingw/lib/libatomic.la
+   /usr/mingw/lib/libgcc_s.a
+   /usr/mingw/lib/libgcc_s_seh-1.dll
+   /usr/mingw/lib/libquadmath-0.dll
+   /usr/mingw/lib/libquadmath.a
+   /usr/mingw/lib/libquadmath.dll.a
+%exclude    /usr/mingw/lib/libquadmath.la
+%exclude /usr/x86_64-w64-mingw32
