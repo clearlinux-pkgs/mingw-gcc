@@ -311,7 +311,7 @@ export CPATH=/usr/include
 export LIBRARY_PATH=/usr/lib64
 pushd ../gcc-build
 
-make DESTDIR=%{buildroot} install-gcc install-headers
+make DESTDIR=%{buildroot} install-gcc 
 
 %files
    /usr/bin/x86_64-w64-mingw32-cpp
