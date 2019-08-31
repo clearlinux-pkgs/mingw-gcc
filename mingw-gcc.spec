@@ -471,7 +471,7 @@ ln -s /usr/bin/x86_64-w64-mingw32-ranlib %{buildroot}/usr/mingw/lib/gcc/x86_64-w
    /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/libgcc.a
    /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/libgcc_eh.a
    /usr/mingw/lib/gcc/x86_64-w64-mingw32/9/libgcov.a
-   /usr/share/info/libquadmath.info
+%exclude   /usr/share/info/libquadmath.info
    /usr/mingw/lib/libatomic-1.dll
    /usr/mingw/lib/libatomic.a
    /usr/mingw/lib/libatomic.dll.a
@@ -532,3 +532,6 @@ ln -s /usr/bin/x86_64-w64-mingw32-ranlib %{buildroot}/usr/mingw/lib/gcc/x86_64-w
 %exclude   /usr/share/info/gfortran.info
    /usr/share/man/man1/x86_64-w64-mingw32-g++.1
    /usr/share/man/man1/x86_64-w64-mingw32-gfortran.1
+  /usr/bin/x86_64-w64-mingw32-c++
+   /usr/bin/x86_64-w64-mingw32-g++
+   /usr/bin/x86_64-w64-mingw32-gfortran
