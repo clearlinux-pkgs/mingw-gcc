@@ -48,6 +48,9 @@ Patch21  : zero-regs-gcc8.patch
 
 Patch99  : fixup-9-branch.patch
 
+# MinGW specific
+Patch1000: 0006-Windows-New-feature-to-allow-overriding.patch
+
 # cves: 1xx
 
 
@@ -238,6 +241,7 @@ GNU cc and gcc C compilers.
 
 %patch21 -p1
 
+%patch1000 -p1
 
 %build
 
