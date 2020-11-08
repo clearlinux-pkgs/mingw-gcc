@@ -18,7 +18,7 @@
 
 Name     : mingw-gcc
 Version  : 9.2.1
-Release  : 648
+Release  : 649
 URL      : http://www.gnu.org/software/gcc/
 Source0  : https://gcc.gnu.org/pub/gcc/releases/gcc-9.2.0/gcc-9.2.0.tar.xz
 Source1  : https://gcc.gnu.org/pub/gcc/infrastructure/isl-0.16.1.tar.bz2
@@ -327,6 +327,11 @@ ln -s /usr/bin/x86_64-w64-mingw32-as %{buildroot}/usr/mingw/lib/gcc/x86_64-w64-m
 ln -s /usr/bin/x86_64-w64-mingw32-ld %{buildroot}/usr/mingw/lib/gcc/x86_64-w64-mingw32/9/ld
 ln -s /usr/bin/x86_64-w64-mingw32-ar %{buildroot}/usr/mingw/lib/gcc/x86_64-w64-mingw32/9/ar
 ln -s /usr/bin/x86_64-w64-mingw32-ranlib %{buildroot}/usr/mingw/lib/gcc/x86_64-w64-mingw32/9/ranlib
+
+# brp-strip-static-lto does not yet support MinGW static libraries, so skip for now
+find %{buildroot} -type f -name '*.a' -print0 | while read -d "" f; do
+  touch $f.no-strip-lto
+done
 
 %files
    /usr/bin/x86_64-w64-mingw32-cpp
